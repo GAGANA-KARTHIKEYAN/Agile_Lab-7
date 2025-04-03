@@ -14,24 +14,22 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v3  # ✅ Ensures tests/ directory is fetched
 
       - name: Set up Python
         uses: actions/setup-python@v3
         with:
-          python-version: '3.8'
+          python-version: "3.8"
 
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pylint pytest
+          pip install -r requirements.txt  # Install project dependencies
+          pip install pytest pylint  # Install testing/linting tools
 
       - name: Run PyLint
-        run: python -m pylint math_operations.py
+        run: python -m pylint math_operations.py  # Lint your code
 
       - name: Run Unit Tests
         run: |
-          # Debug: List files to verify directory structure
-          ls -R
-          # Run pytest (ensure tests/ exists)
-          python -m pytest tests/
+          python -m pytest tests/  # Run tests in the tests/ directory
