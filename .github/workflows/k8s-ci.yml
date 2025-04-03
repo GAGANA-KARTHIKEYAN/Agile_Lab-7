@@ -1,7 +1,10 @@
-name: Kubernetes CI/CD
+name: CI Pipeline
 
 on:
   push:
+    branches:
+      - main
+  pull_request:
     branches:
       - main
 
@@ -16,46 +19,19 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v3
         with:
-          python-version: '3.9'
+          python-version: '3.8'  # Change this if needed
 
       - name: Install Dependencies
         run: |
-          pip install -r app/requirements.txt
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Install Pylint  # ✅ Fix: Install Pylint before running it
+        run: pip install pylint
+
+      - name: Run PyLint
+        run: pylint math_operations.py
 
       - name: Run Unit Tests
-        run: python -m unittest discover app/
+        run: pytest tests/
 
-      - name: Log in to GitHub Container Registry
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
-
-      - name: Build and Push Docker Image
-        run: |
-          docker build -t ghcr.io/${{ github.repository }}/my-app:latest .
-          docker push ghcr.io/${{ github.repository }}/my-app:latest
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-
-      - name: Set up kubectl
-        uses: azure/setup-kubectl@v3
-        with:
-          version: 'latest'
-
-      - name: Configure Kubeconfig
-        run: |
-          mkdir -p $HOME/.kube
-          echo "${{ secrets.KUBE_CONFIG }}" > $HOME/.kube/config
-          chmod 600 $HOME/.kube/config
-
-      - name: Apply Kubernetes Manifests
-        run: kubectl apply -f k8s/
-
-      - name: Verify Deployment
-        run: kubectl rollout status deployment my-app
-
- 
