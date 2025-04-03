@@ -1,6 +1,12 @@
 name: CI Pipeline
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build:
@@ -13,19 +19,15 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v3
         with:
-          python-version: '3.9'  # Adjust Python version if needed
+          python-version: '3.8'  # Update this if needed
 
       - name: Install Dependencies
         run: |
-          if [ -f requirements.txt ]; then
-            pip install -r requirements.txt
-          else
-            echo "requirements.txt not found!"
-            exit 1
-          fi
+          python -m pip install --upgrade pip
+          pip install pylint pytest  # ✅ FIX: Ensure pylint and pytest are installed
 
       - name: Run PyLint
-        run: pylint math_operations.py  # Modify based on your Python files
+        run: python -m pylint math_operations.py  # ✅ FIX: Run pylint as a module
 
       - name: Run Unit Tests
-        run: python -m unittest discover  # Modify if you have specific test files
+        run: python -m pytest tests/
