@@ -1,24 +1,31 @@
 name: CI Pipeline
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v3
         with:
-          python-version: '3.12'
+          python-version: '3.9'  # Adjust Python version if needed
 
       - name: Install Dependencies
-        run: pip install -r requirements.txt
+        run: |
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          else
+            echo "requirements.txt not found!"
+            exit 1
+          fi
 
       - name: Run PyLint
-        run: pylint math_operations.py
+        run: pylint math_operations.py  # Modify based on your Python files
 
       - name: Run Unit Tests
-        run: python -m unittest discover
+        run: python -m unittest discover  # Modify if you have specific test files
